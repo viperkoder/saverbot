@@ -1,13 +1,13 @@
 # Checklist — Phase 0 & Phase 1 (MVP)
 
 ## Phase 0 — Setup
-- [ ] Create GitHub repo under Viperkoder (this doc set goes in as first commit)
+- [x] Create GitHub repo under Viperkoder (doc set + scaffold committed)
 - [ ] Point saver.bot DNS to Cloudflare
-- [ ] Create Cloudflare Pages/Workers project
-- [ ] Claude API key provisioned, stored as Cloudflare secret (never committed)
-- [ ] Minimal placeholder page live at saver.bot
-- [ ] `.gitignore` covers env/secrets
-- [ ] AGENTS.md and docs/DECISIONS.md committed
+- [ ] Create Cloudflare Pages project, connect to repo
+- [ ] Claude API key provisioned, stored as Cloudflare secret (never committed) — `wrangler pages secret put CLAUDE_API_KEY`
+- [ ] Deploy scaffold, confirm placeholder page live at saver.bot
+- [x] `.gitignore` covers env/secrets
+- [x] AGENTS.md and docs/DECISIONS.md committed
 
 ## Phase 1 — Core loop
 ### Upload & intake

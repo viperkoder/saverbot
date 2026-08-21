@@ -1,0 +1,6 @@
+name = "saver-bot"
+compatibility_date = "2026-08-01"
+pages_build_output_dir = "public"
+
+# Secrets (set via `wrangler pages secret put CLAUDE_API_KEY`):
+#   CLAUDE_API_KEY  — Anthropic API key used by functions/api/analyze.js

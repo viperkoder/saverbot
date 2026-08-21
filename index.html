@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>saver.bot — send me something you paid for</title>
+<meta name="description" content="Upload a receipt, bill, or invoice. Saver finds ways you could have paid less.">
+<style>
+  /* Design tokens
+     Subject: a receipt-printer / till-tape aesthetic — the product's own
+     material (receipts) is the design language, not a generic SaaS look.
+     Paper:  #F7F7F2 (cool paper, not the cliché warm cream)
+     Ink:    #1C2430 (near-black navy, not pure black)
+     Saved:  #1F7A5C (money-green accent, not terracotta/neon)
+     Flag:   #C6511C (used sparingly, for "no saving found" honesty)
+     Display face: monospace (till-printer feel) · Body: system sans
+  */
+  :root {
+    --paper: #F7F7F2;
+    --paper-edge: #E7E6DD;
+    --ink: #1C2430;
+    --ink-soft: #5B6472;
+    --saved: #1F7A5C;
+    --flag: #C6511C;
+    --mono: "SFMono-Regular", "IBM Plex Mono", "Courier New", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    font-family: var(--sans);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px 80px;
+  }
+  .tape {
+    width: 100%;
+    max-width: 420px;
+    background: var(--paper);
+    position: relative;
+    padding: 36px 26px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .tape::before, .tape::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    height: 12px;
+    background:
+      linear-gradient(135deg, var(--ink) 25%, transparent 25%) -6px 0,
+      linear-gradient(225deg, var(--ink) 25%, transparent 25%) -6px 0;
+    background-size: 12px 12px;
+    background-repeat: repeat-x;
+  }
+  .tape::before { top: -1px; }
+  .tape::after { bottom: -1px; transform: scaleY(-1); }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border-bottom: 1px dashed var(--paper-edge);
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: 26px;
+    line-height: 1.25;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0 0 26px;
+  }
+
+  .drop {
+    border: 1.5px dashed var(--paper-edge);
+    border-radius: 4px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .drop:hover, .drop.drag {
+    border-color: var(--saved);
+    background: rgba(31,122,92,0.04);
+  }
+  .drop input { display: none; }
+  .drop .icon { font-size: 28px; margin-bottom: 8px; }
+  .drop .label {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .drop .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  button.go {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border: none;
+    border-radius: 4px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+  button.go:disabled { opacity: 0.35; cursor: not-allowed; }
+  button.go:not(:disabled):hover { background: var(--saved); }
+  button.go:focus-visible, .drop:focus-visible { outline: 2px solid var(--saved); outline-offset: 2px; }
+
+  .status {
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align: center;
+    min-height: 18px;
+  }
+
+  .results { margin-top: 22px; display: none; }
+  .results.show { display: block; }
+  .summary {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--paper-edge);
+  }
+  .item {
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--paper-edge);
+  }
+  .item:last-child { border-bottom: none; }
+  .item .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .item .label { font-size: 14px; }
+  .item .saving {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--saved);
+    white-space: nowrap;
+  }
+  .item .reason {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .stamp {
+    display: inline-block;
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--saved);
+    border: 1px solid var(--saved);
+    border-radius: 2px;
+    padding: 1px 5px;
+    transform: rotate(-2deg);
+  }
+  .stamp.flag { color: var(--flag); border-color: var(--flag); }
+
+  .privacy {
+    margin-top: 24px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <main class="tape">
+    <div class="eyebrow">saver.bot · receipt in, savings out</div>
+    <h1>Send me something you paid for.</h1>
+    <p class="sub">I'll check it for ways you could have paid less. No account needed.</p>
+
+    <form id="uploadForm">
+      <label class="drop" id="dropZone" tabindex="0">
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/heic,image/webp,application/pdf" capture="environment">
+        <div class="icon">📸</div>
+        <div class="label">Take a photo or choose a file</div>
+        <div class="hint">Receipt · bill · invoice · renewal · quotation</div>
+      </label>
+      <button type="submit" class="go" id="goBtn" disabled>ANALYZE</button>
+    </form>
+
+    <div class="status" id="status"></div>
+
+    <div class="results" id="results">
+      <div class="summary" id="resultSummary"></div>
+      <div id="resultItems"></div>
+    </div>
+
+    <p class="privacy">Uploaded documents are used only to generate your result and are not sold or shared. No bank or payment account connection, ever.</p>
+  </main>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const goBtn = document.getElementById('goBtn');
+    const statusEl = document.getElementById('status');
+    const resultsEl = document.getElementById('results');
+    const resultSummary = document.getElementById('resultSummary');
+    const resultItems = document.getElementById('resultItems');
+    const form = document.getElementById('uploadForm');
+
+    let selectedFile = null;
+
+    fileInput.addEventListener('change', () => {
+      selectedFile = fileInput.files[0] || null;
+      goBtn.disabled = !selectedFile;
+      dropZone.querySelector('.label').textContent = selectedFile ? selectedFile.name : 'Take a photo or choose a file';
+    });
+
+    ['dragover', 'dragleave', 'drop'].forEach(evt => {
+      dropZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropZone.classList.toggle('drag', evt === 'dragover');
+      });
+    });
+    dropZone.addEventListener('drop', (e) => {
+      const f = e.dataTransfer.files[0];
+      if (f) {
+        fileInput.files = e.dataTransfer.files;
+        selectedFile = f;
+        goBtn.disabled = false;
+        dropZone.querySelector('.label').textContent = f.name;
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selectedFile) return;
+
+      goBtn.disabled = true;
+      resultsEl.classList.remove('show');
+      statusEl.textContent = 'Reading your document…';
+
+      const fd = new FormData();
+      fd.append('file', selectedFile);
+
+      try {
+        const res = await fetch('/api/analyze', { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (!res.ok) {
+          statusEl.textContent = data.error || 'Something went wrong. Try again.';
+          goBtn.disabled = false;
+          return;
+        }
+
+        statusEl.textContent = '';
+        renderResults(data);
+      } catch {
+        statusEl.textContent = 'Could not reach Saver. Check your connection and try again.';
+      } finally {
+        goBtn.disabled = false;
+      }
+    });
+
+    function renderResults(data) {
+      resultSummary.textContent = data.summary || '';
+      resultItems.innerHTML = '';
+
+      if (!data.items || data.items.length === 0) {
+        resultsEl.classList.add('show');
+        return;
+      }
+
+      data.items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        const stampClass = item.possible_saving ? 'stamp' : 'stamp flag';
+        const stampText = item.possible_saving ? 'possible saving' : 'checked, no clear saving';
+        div.innerHTML = `
+          <div class="row">
+            <span class="label">${escapeHtml(item.label || '')}</span>
+            <span class="saving">${item.possible_saving ? escapeHtml(item.possible_saving) : '—'}</span>
+          </div>
+          <div class="reason">${escapeHtml(item.reason || '')}</div>
+          <span class="${stampClass}">${stampText}</span>
+        `;
+        resultItems.appendChild(div);
+      });
+
+      resultsEl.classList.add('show');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
