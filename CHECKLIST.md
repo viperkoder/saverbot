@@ -37,3 +37,18 @@
 - [ ] Landing page copy: one-liner + example result + upload CTA
 - [ ] Track: uploads, findings shown, shares (basic analytics only, no PII beyond what's needed)
 - [ ] Soft-launch to a small group before any public post
+
+
+## VKOS project registration — 12 October 2026
+
+Project ID: `saverbot` · Owner: Viper · Executor/maintainer: Kody and authorised agents.
+
+Objective: Test document-upload savings advice with conservative source-supported findings.
+
+Approved scope and boundary: Web photo/PDF upload only; Claude is the recorded provider; no bank integration, accounts or billing in v0.
+
+Acceptance: Existing Phase 0/1 checklist and 20–30 real-user exit criteria; no invented savings.
+
+Portfolio discovery belongs to the [VKOS register](https://github.com/viperkoder/vk-ops/blob/main/projects/registry.yaml). This file retains its existing authority; registration adds no second roadmap. Follow the [project lifecycle and maintenance standard](https://github.com/viperkoder/vk-knowledge/blob/main/project-management/README.md#project-registration-and-lifecycle).
+
+Documentation reconciliation: Source remains pre-build; deployment and current key availability are unverified. Root DECISIONS.md is the actual decision log.

@@ -21,7 +21,7 @@ actively chase "how do I get money back." That gap is the product.
 `v0 — pre-build`. See [ROADMAP.md](./ROADMAP.md) for phases and
 [CHECKLIST.md](./CHECKLIST.md) for the current build checklist.
 
-## Stack (locked decision — see docs/DECISIONS.md)
+## Stack (locked decision — see DECISIONS.md)
 
 - **Hosting:** Cloudflare Workers/Pages
 - **AI:** Claude API (multimodal — receipt/bill image or PDF in, structured
@@ -42,3 +42,4 @@ value is proven with real users.
 - No stored payment credentials
 - No automated price-tracking crawlers
 - No accounts/login required to try it once
+
