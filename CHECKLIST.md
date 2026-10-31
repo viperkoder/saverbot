@@ -52,3 +52,12 @@ Acceptance: Existing Phase 0/1 checklist and 20–30 real-user exit criteria; no
 Portfolio discovery belongs to the [VKOS register](https://github.com/viperkoder/vk-ops/blob/main/projects/registry.yaml). This file retains its existing authority; registration adds no second roadmap. Follow the [project lifecycle and maintenance standard](https://github.com/viperkoder/vk-knowledge/blob/main/project-management/README.md#project-registration-and-lifecycle).
 
 Documentation reconciliation: Source remains pre-build; deployment and current key availability are unverified. Root DECISIONS.md is the actual decision log.
+
+## VKOS module architecture mapping — 31 October 2026
+
+Owner: Viper; executor: Kody and authorised agents. `ROADMAP.md` retains phase scope; this checklist records current implementation evidence. The repository contains `index.html` and `analyze.js` scaffolding, with no verified production deployment or consumer test.
+
+- **Required for Phase 1:** M01 Research Collector (uploaded document intake); M02 Content Generator (savings explanation); M03 Fact Validator (supported amounts and confidence); M05 Publisher (result response); M10 Integration Adapter (Claude API call); M12 Security & Access (upload validation, retention and rate limit); M13 Test & Verification (synthetic receipt/PDF and error cases); M15 Configuration (secret and deployment settings). `analyze.js` has candidate intake, call and response handling; confidence, schema and source checks are prompt-only and need deterministic validation. All project adoption IDs, including SB-M03, remain **NEEDS RECONCILIATION** until contract and consumer evidence exists.
+- **Optional after Phase 1 evidence:** M04 Editorial Reviewer, M06 Workflow & Approval, M07 Job Runner & Recovery, M08 Notification, M09 Data Store & Retrieval, M11 Observability & Audit, M14 Deployment, M16 Migration.
+- **Not applicable to the approved Phase 0/1 scope:** M17 Monetisation and M17.01–M17.07. Phase 2 premium and Phase 3 affiliate ideas remain deferred under `ROADMAP.md` and `DECISIONS.md`.
+- **Next verification:** add synthetic malformed/unsupported upload, Claude failure, low-confidence, amount/source and privacy/rate-limit cases before claiming any Phase 1 module implemented. Preserve the free-scan sequence and no financial credential storage.
